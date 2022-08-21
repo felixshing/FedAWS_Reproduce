@@ -252,9 +252,9 @@ class FedData():
             client_xs = np.concatenate(values["xs"], axis=0)
             client_ys = np.concatenate(values["ys"], axis=0)
             print("client_xs.shape:", client_xs.shape)
-            # inds = np.random.permutation(client_xs.shape[0])
-            # client_xs = client_xs[inds]
-            # client_ys = client_ys[inds]
+            inds = np.random.permutation(client_xs.shape[0])
+            client_xs = client_xs[inds]
+            client_ys = client_ys[inds]
 
             # filter small corpus
             if len(client_xs) < 5:

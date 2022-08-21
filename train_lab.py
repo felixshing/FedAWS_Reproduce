@@ -334,8 +334,7 @@ def main_cifar_label(dataset, algo):
         elif dataset == "cifar100":
             para_dict["nc_per_client"] = 1
             para_dict["n_clients"] = 100
-        lr = 0.01
-        local_epochs = 2
+
         para_dict["lr"] = lr
         para_dict["c_ratio"] = 0.1
         para_dict["local_epochs"] = local_epochs
