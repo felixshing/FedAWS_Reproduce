@@ -139,7 +139,7 @@ def get_hypers(algo):
             "cnt": 1,
             "margin": [0.8],
             "aws_steps": [30],
-            "aws_lr": [100],
+            "aws_lr": [0.001],
         }
     elif algo == "moon":
         hypers = {
@@ -313,7 +313,7 @@ def main_cifar_label(dataset, algo):
     #             )
     #
     #             main_federated(para_dict)
-    net = "ResNet32"
+    net = "ResNet8"
     local_epochs = 2
     lr = 0.001
     # for local_epochs in [2, 5]:
