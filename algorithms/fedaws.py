@@ -4,7 +4,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import tensorflow as tf
 
+import tf_slim as slim
 from utils import Averager
 from utils import count_acc
 from utils import append_to_logs
@@ -32,9 +34,37 @@ class SpreadModel(nn.Module):
         cos_dis = cos_dis * (1.0 - d_mat)
 
         indx = ((self.margin - cos_dis) > 0.0).float()
-        loss = (((self.margin - cos_dis) * indx) ** 2).mean()
-        return loss
+        loss_1 = (((self.margin - cos_dis) * indx) ** 2).mean()
+        return loss_1
 
+
+
+        #print("loss_1:",loss_1)
+
+        ####belowing is from Fedface
+
+        margin = -0.5
+
+        similarity_matrix=torch.mm(ws_norm,ws_norm.transpose(0,1))
+        mask_non_diag=torch.logical_not(torch.eye(similarity_matrix.shape[0],dtype=torch.bool, device=torch.device("cuda")))
+        dist_neg = similarity_matrix[torch.where(mask_non_diag)]
+        loss_2 = torch.mean(torch.square(margin + dist_neg))
+
+        #print("loss_2:",loss_2)
+        # print(loss_2)
+        return loss_1
+
+
+
+def hinge_loss_with_cos_dis(logits,batch_y, margin=0.9):
+
+    ###expand the batch_y to the same size as logits
+    batch_y_expand = batch_y.unsqueeze(1).expand(batch_y.shape[0], logits.shape[1], logits.shape[2])
+    dist_vec = torch.mm(logits, batch_y.transpose(0, 1))
+    ###hinge loss with cos dis
+    loss = torch.mean(torch.square(margin - dist_vec))
+    ###L2_norm
+    return loss
 
 class FedAws():
     def __init__(
@@ -113,8 +143,8 @@ class FedAws():
                 self.logs["GLO_TACCS"].append(glo_test_acc)
                 self.logs["LOCAL_TACCS"].extend(per_accs)
 
-                print("[R:{}] [Ls:{}] [TeAc:{}] [n:{}] [PAcBeg:{} PAcAft:{}]".format(
-                    r, train_loss, glo_test_acc,n_sam_clients, per_accs[0], per_accs[-1]
+                print("[R:{}] [Ls:{}] [TeAc:{}] [client:{}] [PAcBeg:{} PAcAft:{}]".format(
+                    r, train_loss, glo_test_acc,sam_clients, per_accs[0], per_accs[-1]
                 ))
 
     def update_local(self, r, model, train_loader, test_loader):
@@ -138,7 +168,7 @@ class FedAws():
         model.train()
 
         loader_iter = iter(train_loader)
-        #n_total_bs=5
+        n_total_bs=32
         avg_loss = Averager()
         per_accs = []
 
@@ -164,10 +194,14 @@ class FedAws():
                 batch_x, batch_y = batch_x.cuda(), batch_y.cuda()
 
             hs, logits = model(batch_x)
-
+            ###get model weight
+            ws = model.classifier.weight.data
             criterion = nn.CrossEntropyLoss()
+            #criterion=nn.MultiMarginLoss()
+            #criterion=nn.MultiMarginLoss()
+            #loss = hinge_loss_with_cos_dis(logits, batch_y)
             loss = criterion(logits, batch_y)
-
+            #print("Round:",r,"loss:",loss)
             optimizer.zero_grad()
             loss.backward()
             nn.utils.clip_grad_norm_(

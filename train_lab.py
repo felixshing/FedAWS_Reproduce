@@ -54,7 +54,7 @@ def construct_model(args):
 
     model = ClassifyNet(
         net=args.net,
-        init_way="none",
+        init_way="orth",
         n_classes=args.n_classes
     )
 
@@ -137,9 +137,9 @@ def get_hypers(algo):
             # "aws_steps": [30, 50],
             # "aws_lr": [0.1, 0.01],
             "cnt": 1,
-            "margin": [0.9, 0.5],
-            "aws_steps": [30, 50],
-            "aws_lr": [0.1, 0.01],
+            "margin": [0.8],
+            "aws_steps": [30],
+            "aws_lr": [100],
         }
     elif algo == "moon":
         hypers = {
@@ -166,12 +166,12 @@ def get_hypers(algo):
         }
     elif algo == "fedrs":
         hypers = {
-            "cnt": 3,
+            "cnt": 1,
             "alpha": [0.9, 0.5, 0.1],
         }
     elif algo == "fedphp":
         hypers = {
-            "cnt": 3,
+            "cnt": 1,
             "reg_way": ["KD", "MMD", "MMD"],
             "reg_lamb": [0.05, 0.1, 0.05],
         }
@@ -274,7 +274,7 @@ def main_federated(para_dict):
 def main_cifar_label(dataset, algo):
     hypers = get_hypers(algo)
 
-    lr = 0.01
+
     # for net in ["TFCNN", "VGG11", "VGG11-BN"]:
     #     for local_epochs in [2, 5]:
     #         for j in range(hypers["cnt"]):
@@ -313,9 +313,11 @@ def main_cifar_label(dataset, algo):
     #             )
     #
     #             main_federated(para_dict)
-    net = "ResNet8"
-    # local_epochs = 5
+    net = "ResNet32"
     local_epochs = 2
+    lr = 0.001
+    # for local_epochs in [2, 5]:
+
 
     for j in range(hypers["cnt"]):
         para_dict = {}
@@ -336,10 +338,10 @@ def main_cifar_label(dataset, algo):
             para_dict["n_clients"] = 100
 
         para_dict["lr"] = lr
-        para_dict["c_ratio"] = 0.1
+        para_dict["c_ratio"] = 1
         para_dict["local_epochs"] = local_epochs
         para_dict["max_round"] = 500
-        para_dict["test_round"] = 10
+        para_dict["test_round"] = 1
 
         for key, values in hypers.items():
             if key == "cnt":
@@ -376,5 +378,5 @@ if __name__ == "__main__":
     #         main_cifar_label(dataset, algo)
 
     dataset = "cifar10"
-    algo = "fedaws"
+    algo = "fedrs"
     main_cifar_label(dataset, algo)
