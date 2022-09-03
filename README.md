@@ -3,6 +3,7 @@ This is a reimplementation of FedAWS (Federated Learning with Only Positive Labe
 The reimplementation algorithm comes from [FedRepo](https://github.com/lxcnju/FedRepo).
 Basically, I just modified the code under feddata.py to make sure each client holds only positive label, 
 and I also implement the loss function implemented in [FedFace](https://github.com/illidanlab/fedface/blob/main/source/FedAwS.py), which also uses the FedAWS algorithm.
+
 However, the performance of this reimplementation is pretty bad. It can only achieve at most 17% accuracy on cifar-10 dataset.
 I try to change the hyperparameters, but it doesn't work. I think the reason is that the this code doesn't implement the
 `the learning rate multiplier of the spreadout loss λ` in the FedAWS algorithm, making the  class embeddings are not spreadout.
