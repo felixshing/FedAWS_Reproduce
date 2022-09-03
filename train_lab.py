@@ -139,6 +139,9 @@ def get_hypers(algo):
             "cnt": 1,
             "margin": [0.8],
             "aws_steps": [30],
+            ###Does aws_lr here mean the λ in FedAws?
+            ####I don't think so, it is the learning rate of the SGD optimizer
+            ###How to implement the λ in FedAws?
             "aws_lr": [0.001],
         }
     elif algo == "moon":
@@ -341,7 +344,7 @@ def main_cifar_label(dataset, algo):
         para_dict["c_ratio"] = 1
         para_dict["local_epochs"] = local_epochs
         para_dict["max_round"] = 500
-        para_dict["test_round"] = 1
+        para_dict["test_round"] = 10
 
         for key, values in hypers.items():
             if key == "cnt":

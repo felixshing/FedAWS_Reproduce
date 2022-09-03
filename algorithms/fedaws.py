@@ -41,8 +41,8 @@ class SpreadModel(nn.Module):
 
         #print("loss_1:",loss_1)
 
-        ####belowing is from Fedface
 
+        ###I try to implement the loss function in Fedface, but it doesn't work
         margin = -0.5
 
         similarity_matrix=torch.mm(ws_norm,ws_norm.transpose(0,1))
@@ -55,7 +55,7 @@ class SpreadModel(nn.Module):
         return loss_1
 
 
-
+###I try to implement the hinge loss with consine distance, but I failed
 def hinge_loss_with_cos_dis(logits,batch_y, margin=0.9):
 
     ###expand the batch_y to the same size as logits
